@@ -1,7 +1,7 @@
+import clients.KtorAsyncHttpClient
 import clients.VKClient
 import com.typesafe.config.ConfigFactory
 import configs.VKConfig
-import io.ktor.client.HttpClient
 import kotlinx.coroutines.runBlocking
 import time.getSearchTimestamps
 import java.io.File
@@ -21,9 +21,9 @@ fun main(args: Array<String>) = runBlocking {
     val config = VKConfig(parsedFile.getConfig("vk"))
     val curDate = Date()
     val searchTimestamps = getSearchTimestamps(curDate, hours)
-    val client = VKClient(HttpClient(), config)
+    val client = VKClient(KtorAsyncHttpClient(), config)
     val res = searchTimestamps.map { (startTime, endTime) -> client.getResponse(hastTag, startTime, endTime) }
-        .map { it?.response?.totalCount.toString() ?: "???" }
+        .map { it?.response?.totalCount?.toString() ?: "???" }
     for (i in (0 until hours)) {
         println("В промежуток с ${hours - i} по ${hours - i - 1} часов назад было ${res[i]} новостей с хэштегом #$hastTag")
     }
