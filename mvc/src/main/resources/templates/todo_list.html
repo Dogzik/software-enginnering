@@ -1,0 +1,74 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<head>
+    <title>Todo list</title>
+</head>
+<body>
+
+<h3>Add new todo</h3>
+<form th:object="${dto_item}" method="post" action="/add-todo">
+    <table>
+        <tr>
+            <td><label>Name:</label></td>
+            <td><label>
+                <input type="text" th:field="*{name}"/>
+            </label></td>
+        </tr>
+        <tr>
+            <td><label>Description:</label></td>
+            <td><label>
+                <input type="text" th:field="*{description}"/>
+            </label></td>
+        </tr>
+    </table>
+
+    <input type="submit" value="add">
+</form>
+
+<h3>Change todo by id</h3>
+<form method="post" action="/change-todo-status">
+    <table>
+        <tr>
+            <td><label>Todo id:</label></td>
+            <td><label>
+                <input type="text" th:name="id"/>
+            </label></td>
+            <td><input type="submit" value="change status"></td>
+        </tr>
+    </table>
+</form>
+
+<h3>Your todo list</h3>
+<table>
+    <thead>
+    <tr>
+        <th></th>
+        <th>Name</th>
+        <th>Description</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="todo : ${todo_items}">
+        <td>
+            <form method="post" action="/change-todo-status">
+                <input type="hidden" th:name="id" th:value="${todo.id}"/>
+                <label>
+                    <input type="checkbox" name="is_done" th:checked="${todo.isDone()}" onclick="this.form.submit()"/>
+                </label>
+            </form>
+        </td>
+        <td th:text="${todo.name}"></td>
+        <td th:text="${todo.description}"></td>
+        <td>
+            <form method="post" action="/remove-todo">
+                <input type="hidden" th:name="id" th:value="${todo.id}"/>
+                <button type="submit">Delete</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
