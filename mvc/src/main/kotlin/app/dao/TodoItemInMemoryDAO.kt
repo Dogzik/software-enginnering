@@ -22,7 +22,7 @@ class TodoItemInMemoryDAO : TodoItemDAO {
         storage.remove(id)
     }
 
-    override fun updateItem(id: Long, mapper: (TodoItem) -> TodoItem) {
-        storage.compute(id) { _, value -> value?.let(mapper) }
+    override fun setItemStatus(id: Long, status: Boolean) {
+        storage.compute(id) { _, value -> value?.copy(isDone = status) }
     }
 }

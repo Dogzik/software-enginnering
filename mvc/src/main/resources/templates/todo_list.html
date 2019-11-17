@@ -32,7 +32,7 @@
         <tr>
             <td><label>Todo id:</label></td>
             <td><label>
-                <input type="text" th:name="id"/>
+                <input type="text" name="id"/>
             </label></td>
             <td><input type="submit" value="change status"></td>
         </tr>
@@ -53,9 +53,11 @@
     <tr th:each="todo : ${todo_items}">
         <td>
             <form method="post" action="/change-todo-status">
-                <input type="hidden" th:name="id" th:value="${todo.id}"/>
+                <input type="hidden" name="id" th:value="${todo.id}"/>
                 <label>
-                    <input type="checkbox" name="is_done" th:checked="${todo.isDone()}" onclick="this.form.submit()"/>
+                    <input type="hidden" name="status" th:value="${not todo.isDone()}"/>
+                    <input type="checkbox" name="isDone" th:checked="${todo.isDone()}"
+                           onclick="this.form.submit()"/>
                 </label>
             </form>
         </td>

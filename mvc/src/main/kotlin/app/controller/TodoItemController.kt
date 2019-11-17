@@ -39,8 +39,8 @@ class TodoItemController(private val service: TodoItemService) {
     }
 
     @PostMapping("/change-todo-status")
-    fun changeTodoStatus(@RequestParam("id") id: Long): String {
-        service.changeItemStatus(id)
+    fun changeTodoStatus(@RequestParam("id") id: Long, @RequestParam("status") status: Boolean): String {
+        service.setItemStatus(id, status)
         return "redirect:/todo-list"
     }
 }
