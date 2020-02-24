@@ -101,7 +101,11 @@ public class SearchActor extends AbstractActor {
         String queryUrl = "http://" + query.config.host + ':' + query.config.port + "/search?query=" + query.text;
         searchEngine = query.config.name;
         aggregator = sender();
-        responseFuture = client.run(new HttpGet(queryUrl), new SearchCallback(getContext().getSelf()));
+        try {
+            responseFuture = client.run(new HttpGet(queryUrl), new SearchCallback(getContext().getSelf()));
+        } catch (Exception ignored) {
+            self().tell(SearchError.INSTANCE, self());
+        }
     }
 
     @Override

@@ -4,6 +4,7 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.ReceiveTimeout;
+import akka.japi.pf.ReceiveBuilder;
 import config.AggregatorConfig;
 import config.SearchConfig;
 import http.AsyncHttpClientProvider;
@@ -24,7 +25,7 @@ public class AggregateActor extends AbstractActor {
     private final Map<String, List<String>> currentResult;
 
     public static Props props(CompletableFuture<Map<String, List<String>>> resultConsumer, AggregatorConfig config,
-                       AsyncHttpClientProvider clientProvider) {
+                              AsyncHttpClientProvider clientProvider) {
         return Props.create(AggregateActor.class, () -> new AggregateActor(resultConsumer, config, clientProvider));
     }
 
@@ -39,7 +40,11 @@ public class AggregateActor extends AbstractActor {
 
     @Override
     public Receive createReceive() {
-        return null;
+        return new ReceiveBuilder()
+                .match(AggregateSearchQuery.class, this::onAggregateSearchQuery)
+                .match(SearchResult.class, this::onSearchResult)
+                .match(ReceiveTimeout.class, this::onReceiveTimeout)
+                .build();
     }
 
     private void onAggregateSearchQuery(AggregateSearchQuery query) {
