@@ -64,7 +64,7 @@ public class SearchActor extends AbstractActor {
     }
 
     private AsyncHttpClient client;
-    private volatile Future<HttpResponse> responseFuture;
+    private Future<HttpResponse> responseFuture;
     private String searchEngine;
     private ActorRef aggregator;
 

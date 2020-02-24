@@ -1,6 +1,8 @@
 import actors.AggregateActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import config.AggregatorConfig;
@@ -29,6 +31,7 @@ public class Main {
         AsyncHttpClientProvider clientProvider = new ApacheAsyncClientProvider();
         ActorSystem system = ActorSystem.create("AggregateSystem");
         System.out.println("Type your requests");
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
             while (true) {
                 String query = reader.readLine();
@@ -36,7 +39,7 @@ public class Main {
                 ActorRef aggregator = system.actorOf(AggregateActor.props(result, aggregatorConfig, clientProvider));
                 aggregator.tell(new AggregateSearchQuery(query, searchEnginesConfigs), ActorRef.noSender());
                 Map<String, List<String>> readyResult = result.get();
-                System.out.println(readyResult);
+                System.out.println(gson.toJson(readyResult));
             }
         } catch (IOException | InterruptedException | ExecutionException e) {
             System.err.println(e.getMessage());
