@@ -47,7 +47,7 @@ public class SearchActorTest {
         String query = "test";
         AsyncHttpClientProvider provider = new SuccessClientProvider();
         List<String> real = startTest(provider, query);
-        List<String> expected = Collections.singletonList("Result for " + query);
+        List<String> expected = Collections.singletonList("Result for " + query + " from host");
         Assert.assertEquals(expected, real);
     }
 
