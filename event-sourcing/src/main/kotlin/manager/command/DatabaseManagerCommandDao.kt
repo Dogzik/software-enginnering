@@ -21,14 +21,14 @@ class DatabaseManagerCommandDao(
         newId
     }
 
-    override suspend fun renewSubscription(user_id: Int, until: LocalDateTime) = connection.inTransaction { transaction ->
+    override suspend fun renewSubscription(userId: Int, until: LocalDateTime) = connection.inTransaction { transaction ->
         val curTime = LocalDate.now()
         if (!curTime.isBefore(until)) {
             throw IllegalArgumentException("Cannot review past($until) at now($curTime)")
         }
-        val (user, eventId) = getUserWithSubscription(transaction, user_id)
+        val (user, eventId) = getUserWithSubscription(transaction, userId)
         if (user == null) {
-            throw IllegalArgumentException("No user with user_id = $user_id")
+            throw IllegalArgumentException("No user with user_id = $userId")
         }
         if (user.subscriptionEnd?.let { !it.isBefore(until) } == true) {
             throw IllegalArgumentException("Already subscribed for longer period")
@@ -39,7 +39,7 @@ class DatabaseManagerCommandDao(
                 INSERT INTO subscription_events (event_id, user_id, end_time)
                 VALUES (?, ?, ?)
             """.trimIndent()
-        transaction.sendPreparedStatement(newEventCommand, listOf(newEventId, user_id, until))
+        transaction.sendPreparedStatement(newEventCommand, listOf(newEventId, userId, until))
         Unit
     }
 

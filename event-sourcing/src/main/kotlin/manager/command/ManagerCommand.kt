@@ -6,4 +6,4 @@ sealed class ManagerCommand
 
 data class CreateUserCommand(val name: String) : ManagerCommand()
 
-data class RenewSubscriptionCommand(val user_id: Int, val until: LocalDateTime) : ManagerCommand()
+data class RenewSubscriptionCommand(val userId: Int, val until: LocalDateTime) : ManagerCommand()

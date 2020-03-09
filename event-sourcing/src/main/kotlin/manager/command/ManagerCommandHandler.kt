@@ -10,7 +10,7 @@ class ManagerCommandHandler(private val dao: ManagerCommandDao) : Handler<Manage
                 "New user's id = $id"
             }
             is RenewSubscriptionCommand -> {
-                dao.renewSubscription(task.user_id, task.until)
+                dao.renewSubscription(task.userId, task.until)
                 "Successfully renewed subscription"
             }
         }
