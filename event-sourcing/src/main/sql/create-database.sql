@@ -19,15 +19,15 @@ CREATE TABLE users
 
 CREATE TABLE gate_events
 (
-    user_id    INT           NOT NULL PRIMARY KEY REFERENCES users (user_id),
-    event_id   INT           NOT NULL,
+    event_id   INT           NOT NULL PRIMARY KEY,
+    user_id    INT           NOT NULL REFERENCES users (user_id),
     event_type GateEventType NOT NULL,
     event_time TIMESTAMP     NOT NULL
 );
 
 CREATE TABLE subscription_events
 (
-    user_id  INT       NOT NULL PRIMARY KEY REFERENCES users (user_id),
-    event_id INT       NOT NULL,
+    event_id INT       NOT NULL PRIMARY KEY,
+    user_id  INT       NOT NULL REFERENCES users (user_id),
     end_time TIMESTAMP NOT NULL
 );

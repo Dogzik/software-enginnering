@@ -36,10 +36,10 @@ class DatabaseManagerCommandDao(
         val newEventId = eventId!! + 1
         val newEventCommand =
             """
-                INSERT INTO subscription_events (user_id, event_id, end_time)
+                INSERT INTO subscription_events (event_id, user_id, end_time)
                 VALUES (?, ?, ?)
             """.trimIndent()
-        transaction.sendPreparedStatement(newEventCommand, listOf(user_id, newEventId, until))
+        transaction.sendPreparedStatement(newEventCommand, listOf(newEventId, user_id, until))
         Unit
     }
 
