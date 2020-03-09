@@ -15,6 +15,9 @@ class DatabaseGateCommandDao(private val connection: SuspendingConnection) : Gat
             if (prevEvent.first.type != GateEventType.ENTER) {
                 throw IllegalArgumentException("Previous event must be ENTER for user_id = $userId")
             }
+            if (!prevEvent.first.time.isBefore(time)) {
+                throw IllegalArgumentException("Can't add events earlier last one")
+            }
             val newEventId = prevEvent.second + 1
             addGateEvent(it, userId, GateEvent(GateEventType.EXIT, time), newEventId)
             prevEvent.first.time to newEventId
@@ -32,6 +35,9 @@ class DatabaseGateCommandDao(private val connection: SuspendingConnection) : Gat
         val prevEvent = getLastGateEvent(transaction, userId).second
         if (prevEvent?.first?.type == GateEventType.ENTER) {
             throw IllegalArgumentException("Previous event was ENTER for user_id = $userId")
+        }
+        if (prevEvent?.first?.time?.let { !it.isBefore(time) } == true) {
+            throw IllegalArgumentException("Can't add events earlier last one")
         }
         val newEventId = prevEvent?.second?.let { it + 1 } ?: 0
         addGateEvent(transaction, userId, GateEvent(GateEventType.ENTER, time), newEventId)
