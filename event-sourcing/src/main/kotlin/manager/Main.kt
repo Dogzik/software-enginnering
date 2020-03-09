@@ -2,6 +2,7 @@ package manager
 
 import com.typesafe.config.ConfigFactory
 import common.connection.PostgresConnectionProvider
+import common.utils.getUserId
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respondText
@@ -32,10 +33,10 @@ fun main() = runBlocking {
     var server = embeddedServer(Netty, port = config.serverConfig.port) {
         routing {
             get("/command/renew_sub") {
-                val userId = call.request.queryParameters["user_id"]?.toInt()
+                val userId = getUserId(call.request)
                 val until = call.request.queryParameters["until"]?.let { LocalDateTime.parse(it) }
                 if ((userId == null) || (until == null)) {
-                    call.respondText("Error: user_id and until are required", status = HttpStatusCode.BadRequest);
+                    call.respondText("Error: user_id and until are required", status = HttpStatusCode.BadRequest)
                 } else {
                     val command = RenewSubscriptionCommand(userId, until)
                     call.respondText(commandHandler.handle(command))
@@ -51,7 +52,7 @@ fun main() = runBlocking {
                 }
             }
             get("/query/get_user") {
-                val userId = call.request.queryParameters["user_id"]?.toInt()
+                val userId = getUserId(call.request)
                 if (userId == null) {
                     call.respondText("Error: user_id is required", status = HttpStatusCode.BadRequest)
                 } else {
