@@ -17,15 +17,15 @@ class MemoryStatisticsState : StatisticsState {
                     SELECT user_id,
                            event_type,
                            event_time,
-                           event_id,
-                           rank() OVER (PARTITION BY (user_id, event_type) ORDER BY event_id) AS num
+                           user_event_id,
+                           rank() OVER (PARTITION BY (user_id, event_type) ORDER BY user_event_id) AS num
                     FROM gate_events
                 ),
                      exits AS (
                          SELECT user_id,
                                 num,
-                                event_time AS exit_time,
-                                event_id   AS exit_id
+                                event_time    AS exit_time,
+                                user_event_id AS exit_id
                          FROM ranked_events
                          WHERE event_type = 'EXIT'
                      ),

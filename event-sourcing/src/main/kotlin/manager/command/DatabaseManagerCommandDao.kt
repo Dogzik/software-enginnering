@@ -2,7 +2,6 @@ package manager.command
 
 import com.github.jasync.sql.db.SuspendingConnection
 import common.dao.CommonDao
-import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 import java.util.concurrent.atomic.AtomicReference
 
@@ -22,7 +21,7 @@ class DatabaseManagerCommandDao(
     }
 
     override suspend fun renewSubscription(userId: Int, until: LocalDateTime) = connection.inTransaction { transaction ->
-        val curTime = LocalDate.now()
+        val curTime = LocalDateTime.now()
         if (!curTime.isBefore(until)) {
             throw IllegalArgumentException("Cannot review past($until) at now($curTime)")
         }
@@ -33,13 +32,13 @@ class DatabaseManagerCommandDao(
         if (user.subscriptionEnd?.let { !it.isBefore(until) } == true) {
             throw IllegalArgumentException("Already subscribed for longer period")
         }
-        val newEventId = eventId!! + 1
+        val newEventId = (eventId ?: 0) + 1
         val newEventCommand =
             """
-                INSERT INTO subscription_events (event_id, user_id, end_time)
+                INSERT INTO subscription_events (user_id, user_event_id, end_time)
                 VALUES (?, ?, ?)
             """.trimIndent()
-        transaction.sendPreparedStatement(newEventCommand, listOf(newEventId, userId, until))
+        transaction.sendPreparedStatement(newEventCommand, listOf(userId, newEventId, until))
         Unit
     }
 
