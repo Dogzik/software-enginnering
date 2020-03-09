@@ -1,0 +1,11 @@
+DROP TYPE EntityType CASCADE;
+
+DROP TYPE GateEventType CASCADE;
+
+DROP TABLE ids_pool CASCADE;
+
+DROP TABLE users CASCADE;
+
+DROP TABLE gate_events CASCADE;
+
+DROP TABLE subscription_events CASCADE;

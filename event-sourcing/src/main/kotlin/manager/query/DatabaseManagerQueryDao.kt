@@ -1,0 +1,10 @@
+package manager.query
+
+import com.github.jasync.sql.db.SuspendingConnection
+import common.dao.CommonDao
+import manager.model.User
+
+class DatabaseManagerQueryDao(private val connection: SuspendingConnection) : ManagerQueryDao, CommonDao() {
+    override suspend fun getUser(user_id: Int): User? =
+        connection.inTransaction { getUserWithSubscription(it, user_id).first }
+}
