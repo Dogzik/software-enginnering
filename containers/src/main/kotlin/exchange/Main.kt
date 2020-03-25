@@ -2,9 +2,11 @@ package exchange
 
 import exchange.dao.InMemoryExchangeDao
 import exchange.model.Shares
-import io.ktor.application.ApplicationCall
+import exchange.model.SharesPurchase
+import getCompany
+import getCount
+import getPrice
 import io.ktor.application.call
-import io.ktor.http.HttpStatusCode
 import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.routing
@@ -13,19 +15,10 @@ import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
+import respondError
+import respondNotEnoughParams
 import kotlin.Exception
 
-fun ApplicationCall.getString(name: String): String? = request.queryParameters[name]
-fun ApplicationCall.getLong(name: String): Long? = getString(name)?.toLong()
-fun ApplicationCall.getCompany(): String? = getString("company")
-fun ApplicationCall.getCount(): Long? = getLong("count")
-fun ApplicationCall.getPrice(): Long? = getLong("price")
-
-suspend fun ApplicationCall.respondNotEnoughParams(): Unit =
-    respondText("Not all params are provided", status = HttpStatusCode.BadRequest)
-
-suspend fun ApplicationCall.respondError(e: Exception): Unit =
-    respondText("Error: ${e.message}", status = HttpStatusCode.InternalServerError)
 
 fun main(): Unit = runBlocking {
     val dao = InMemoryExchangeDao()
@@ -73,8 +66,20 @@ fun main(): Unit = runBlocking {
                 if ((company == null) || (count == null)) {
                     call.respondNotEnoughParams()
                 } else try {
-                    val debt = dao.buyShares(company, count)
-                    call.respondText(debt.toString())
+                    val purchase = dao.buyShares(company, count)
+                    call.respondText(parser.stringify(SharesPurchase.serializer(), purchase))
+                } catch (e: Exception) {
+                    call.respondError(e)
+                }
+            }
+            get("/sell_shares") {
+                val company = call.getCompany()
+                val count = call.getCount()
+                if ((company == null) || (count == null)) {
+                    call.respondNotEnoughParams()
+                } else try {
+                    val profit = dao.sellShares(company, count)
+                    call.respondText(profit.toString())
                 } catch (e: Exception) {
                     call.respondError(e)
                 }
