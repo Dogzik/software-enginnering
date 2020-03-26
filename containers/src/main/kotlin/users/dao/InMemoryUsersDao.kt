@@ -1,7 +1,5 @@
 package users.dao
 
-import exchange.model.Shares
-import exchange.model.SharesPurchase
 import users.http.ExchangeHttpClient
 import users.model.FullUserShares
 import users.model.User
@@ -26,10 +24,10 @@ class InMemoryUsersDao(private val client: ExchangeHttpClient) : UsersDao {
         check(newBalance != null) { "User with id $id doesn't exist" }
     }
 
-    override suspend fun getDetailedShares(id: Long): List<FullUserShares> {
+    override suspend fun getDetailedShares(id: Long): Set<FullUserShares> {
         val user = users[id]
         check(user != null) { "User with id $id doesn't exist" }
-        return getUserDetailedShares(user)
+        return getUserDetailedShares(user).toSet()
     }
 
     override fun getBalance(id: Long): Long {
@@ -46,15 +44,15 @@ class InMemoryUsersDao(private val client: ExchangeHttpClient) : UsersDao {
         return sharesBalance + user.balance
     }
 
-    override suspend fun buyShares(id: Long, company: String, count: Long): SharesPurchase {
+    override suspend fun buyShares(id: Long, company: String, count: Long): Long {
         check(users.containsKey(id)) { "User with id $id doesn't exist" }
-        val purchase = client.buyShares(company, count)
+        val debt = client.buyShares(company, count)
         users.computeIfPresent(id) { _, user ->
             val mutableShares = user.shares.toMutableMap()
-            mutableShares.compute(company) { _, cnt -> cnt?.plus(purchase.count) ?: purchase.count }
-            user.copy(balance = user.balance - purchase.debt, shares = mutableShares)
+            mutableShares.compute(company) { _, cnt -> cnt?.plus(count) ?: count }
+            user.copy(balance = user.balance - debt, shares = mutableShares)
         }
-        return purchase
+        return debt
     }
 
     override suspend fun sellShares(id: Long, company: String, count: Long): Long {
@@ -70,7 +68,7 @@ class InMemoryUsersDao(private val client: ExchangeHttpClient) : UsersDao {
                 user.copy(shares = mutableShares)
             }
         }
-        check(success) { "Not enough shares to sell" }
+        check(success) { "Not enough shares to sell or no user" }
         try {
             val profit = client.sellShares(company, count)
             users.computeIfPresent(id) { _, user -> user.copy(balance = user.balance + profit) }

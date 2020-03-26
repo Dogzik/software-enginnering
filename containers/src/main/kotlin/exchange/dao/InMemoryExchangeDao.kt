@@ -1,9 +1,7 @@
 package exchange.dao
 
 import exchange.model.Shares
-import exchange.model.SharesPurchase
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.math.min
 
 class InMemoryExchangeDao : ExchangeDao {
     override fun addCompany(company: String, shares: Shares) {
@@ -19,17 +17,20 @@ class InMemoryExchangeDao : ExchangeDao {
 
     override fun getShares(company: String): Shares? = companies[company]
 
-    override fun buyShares(company: String, count: Long): SharesPurchase {
+    override fun buyShares(company: String, count: Long): Long {
         require(count > 0) { "Count must be positive" }
-        var debt = 0L
-        var realCnt = 0L
+        var debt: Long? = null
         val newShares = companies.computeIfPresent(company) { _, shares ->
-            realCnt = min(count, shares.count)
-            debt = realCnt * shares.price
-            shares.copy(count = shares.count - realCnt)
+            if (shares.count < count) {
+                shares
+            } else {
+                debt = count * shares.price
+                shares.copy(count = shares.count - count)
+            }
         }
         check(newShares != null) { "Company $company doesn't exists" }
-        return SharesPurchase(realCnt, debt)
+        check(debt != null) { "Doesn't have enough shares" }
+        return debt!!
     }
 
     override fun sellShares(company: String, count: Long): Long {

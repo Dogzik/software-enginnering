@@ -1,14 +1,11 @@
 package users
 
 import com.typesafe.config.ConfigFactory
-import exchange.model.Shares
-import exchange.model.SharesPurchase
 import getCompany
 import getCount
 import getId
 import getName
 import io.ktor.application.call
-import io.ktor.http.cio.websocket.pinger
 import io.ktor.response.respondText
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -21,7 +18,7 @@ import users.http.KtorExchangeHttpClient
 import java.nio.file.Paths
 import io.ktor.routing.get
 import io.ktor.routing.routing
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.set
 import respondError
 import respondNotEnoughParams
 import users.model.FullUserShares
@@ -74,7 +71,7 @@ fun main(): Unit = runBlocking {
                     call.respondNotEnoughParams()
                 } else try {
                     val detailedShares = dao.getDetailedShares(id)
-                    call.respondText(parser.stringify(FullUserShares.serializer().list, detailedShares))
+                    call.respondText(parser.stringify(FullUserShares.serializer().set, detailedShares))
                 } catch (e: Exception) {
                     call.respondError(e)
                 }
@@ -97,8 +94,8 @@ fun main(): Unit = runBlocking {
                 if ((id == null) || (company == null) || (count == null)) {
                     call.respondNotEnoughParams()
                 } else try {
-                    val purchase = dao.buyShares(id, company, count)
-                    call.respondText(parser.stringify(SharesPurchase.serializer(), purchase))
+                    val debt = dao.buyShares(id, company, count)
+                    call.respondText(debt.toString())
                 } catch (e: Exception) {
                     call.respondError(e)
                 }

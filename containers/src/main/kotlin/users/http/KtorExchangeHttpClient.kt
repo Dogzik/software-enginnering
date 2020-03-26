@@ -1,8 +1,8 @@
 package users.http
 
 import exchange.model.Shares
-import exchange.model.SharesPurchase
 import io.ktor.client.HttpClient
+import io.ktor.client.features.HttpTimeout
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.readText
@@ -30,7 +30,7 @@ class KtorExchangeHttpClient(config: ExchangeClientConfig) : ExchangeHttpClient 
         return futures.map { parser.parse(Shares.serializer(), it.await()).price }
     }
 
-    override suspend fun buyShares(company: String, count: Long): SharesPurchase {
+    override suspend fun buyShares(company: String, count: Long): Long {
         val url = urlBuilder()
             .addPath("buy_shares")
             .append("?")
@@ -38,7 +38,7 @@ class KtorExchangeHttpClient(config: ExchangeClientConfig) : ExchangeHttpClient 
             .append("&")
             .addCount(count)
             .toString()
-        return parser.parse(SharesPurchase.serializer(), getString(url))
+        return getString(url).toLong()
     }
 
     override suspend fun sellShares(company: String, count: Long): Long {
@@ -56,7 +56,12 @@ class KtorExchangeHttpClient(config: ExchangeClientConfig) : ExchangeHttpClient 
         client.close()
     }
 
-    private val client = HttpClient()
+    private val client = HttpClient {
+        install(HttpTimeout) {
+            requestTimeoutMillis = 2000
+        }
+        expectSuccess = false
+    }
     private val base = "http://${config.host}:${config.port}"
 
     private fun urlBuilder(): StringBuilder = StringBuilder(base)
@@ -64,7 +69,7 @@ class KtorExchangeHttpClient(config: ExchangeClientConfig) : ExchangeHttpClient 
     private suspend fun getString(url: String): String {
         val response = client.get<HttpResponse>(url)
         val content = response.readText()
-        check(response.status == HttpStatusCode.OK) { "Server error: $content" }
+        check(response.status == HttpStatusCode.OK) { "Error from server: $content" }
         return content
     }
 

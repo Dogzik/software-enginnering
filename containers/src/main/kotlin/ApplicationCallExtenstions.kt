@@ -14,4 +14,4 @@ suspend fun ApplicationCall.respondNotEnoughParams(): Unit =
     respondText("Not all params are provided", status = HttpStatusCode.BadRequest)
 
 suspend fun ApplicationCall.respondError(e: Exception): Unit =
-    respondText("Error: ${e.message}", status = HttpStatusCode.InternalServerError)
+    respondText("Error: ${e.message}", status = HttpStatusCode.BadRequest)

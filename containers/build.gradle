@@ -28,10 +28,11 @@ jar {
 dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.20.0"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    testCompile group: 'junit', name: 'junit', version: '4.12'
     compile group: 'io.ktor', name: 'ktor-server-netty', version: '1.3.1'
     compile group: 'io.ktor', name: 'ktor-client-apache', version: '1.3.1'
     compile group: 'com.typesafe', name: 'config', version: '1.4.0'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile group: 'org.testcontainers', name: 'testcontainers', version: '1.13.0'
 }
 
 compileKotlin {
@@ -65,3 +66,5 @@ task removeImage(type: DockerRemoveImage) {
 task buildImage(type: DockerBuildImage, dependsOn: [createDockerfile, removeImage]) {
     images.add("dogzik/exchange:latest")
 }
+
+test.dependsOn buildImage

@@ -2,7 +2,6 @@ package exchange
 
 import exchange.dao.InMemoryExchangeDao
 import exchange.model.Shares
-import exchange.model.SharesPurchase
 import getCompany
 import getCount
 import getPrice
@@ -66,8 +65,8 @@ fun main(): Unit = runBlocking {
                 if ((company == null) || (count == null)) {
                     call.respondNotEnoughParams()
                 } else try {
-                    val purchase = dao.buyShares(company, count)
-                    call.respondText(parser.stringify(SharesPurchase.serializer(), purchase))
+                    val debt = dao.buyShares(company, count)
+                    call.respondText(debt.toString())
                 } catch (e: Exception) {
                     call.respondError(e)
                 }
