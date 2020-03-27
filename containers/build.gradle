@@ -8,6 +8,7 @@ plugins {
 import com.bmuschko.gradle.docker.tasks.image.Dockerfile
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import com.bmuschko.gradle.docker.tasks.image.DockerRemoveImage
+import com.github.dockerjava.api.exception.NotFoundException
 
 group 'org.example'
 version '1.0-SNAPSHOT'
@@ -57,7 +58,8 @@ task createDockerfile(type: Dockerfile, dependsOn: copyJar) {
 task removeImage(type: DockerRemoveImage) {
     targetImageId("dogzik/exchange:latest")
     onError { exc ->
-        if (exc.message != null && !exc.message.contains('NotModifiedException')) {
+        if (exc.message != null && !exc.message.contains('NotModifiedException')
+                && exc.class != NotFoundException.class) {
             throw new RuntimeException(exc)
         }
     }
